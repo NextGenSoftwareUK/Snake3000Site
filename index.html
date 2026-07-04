@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snake 3000 — Where It All Began</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#010d04;
+  --bg-card:#051209;
+  --green:#00e87c;
+  --green2:#00ff88;
+  --lime:#b8ff3a;
+  --gold:#f0a500;
+  --electric:#00c8ff;
+  --violet:#a855f7;
+  --crimson:#e8003d;
+  --text:#a8d4b8;
+  --heading:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;line-height:1.75;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,232,124,.08),transparent 60%),
+             radial-gradient(ellipse 40% 30% at 10% 90%,rgba(184,255,58,.04),transparent 60%);
+  pointer-events:none;z-index:0}
+
+/* ── PIXEL GRID BG ── */
+body::after{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,232,124,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,124,.03) 1px,transparent 1px);
+  background-size:32px 32px;pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(1,13,4,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,232,124,.15)}
+.nav-brand{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:.15em;color:#fff;text-decoration:none}
+.nav-brand span{color:var(--green)}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--text);text-decoration:none;transition:color .2s;text-transform:uppercase}
+.nav-links a:hover{color:var(--green2)}
+.nav-links-mobile-only{display:none}
+.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-cta{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--green);border:1px solid rgba(0,232,124,.35);border-radius:999px;padding:8px 18px;text-decoration:none;transition:background .2s;white-space:nowrap}
+.nav-cta:hover{background:rgba(0,232,124,.08);border-color:var(--green2)}
+.nav-toggle{display:none;flex-direction:column;justify-content:center;gap:5px;width:32px;height:32px;background:none;border:none;cursor:pointer;z-index:101}
+.nav-toggle span{display:block;width:100%;height:2px;background:var(--text);transition:transform .25s,opacity .25s}
+.nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-toggle.open span:nth-child(2){opacity:0}
+.nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:900px){
+  .nav-links{display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(1,13,4,.98);padding:100px 40px 40px;gap:28px;z-index:99}
+  .nav-links.open{display:flex}
+  .nav-links-mobile-only{display:list-item}
+  .nav-toggle{display:flex}
+  nav{padding:16px 20px}
+}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;z-index:1}
+.hero-kicker{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.28em;color:var(--green);margin-bottom:24px;opacity:.9}
+.snake-animation{font-size:48px;letter-spacing:-4px;margin-bottom:28px;display:block;animation:slither 3s ease-in-out infinite}
+@keyframes slither{0%,100%{letter-spacing:-4px;opacity:.8}50%{letter-spacing:4px;opacity:1}}
+.hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(44px,9vw,100px);font-weight:900;letter-spacing:.06em;color:#fff;line-height:1;text-shadow:0 0 40px rgba(0,232,124,.5),0 0 80px rgba(0,232,124,.2);margin-bottom:8px;animation:green-pulse 4s ease-in-out infinite}
+@keyframes green-pulse{0%,100%{text-shadow:0 0 40px rgba(0,232,124,.4),0 0 80px rgba(0,232,124,.15)}50%{text-shadow:0 0 70px rgba(0,232,124,.8),0 0 140px rgba(0,232,124,.3)}}
+.hero-year{font-family:'Orbitron',sans-serif;font-size:clamp(14px,2vw,22px);font-weight:700;letter-spacing:.3em;color:var(--lime);margin-bottom:32px}
+.hero-tagline{font-family:'Share Tech Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:.18em;color:var(--electric);margin-bottom:36px;opacity:.9}
+.hero-sub{font-size:clamp(16px,2vw,19px);color:var(--text);line-height:1.85;max-width:700px;margin:0 auto 48px}
+.hero-sub strong{color:#fff}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-green{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;background:var(--green);color:#010d04;border-radius:4px;padding:14px 36px;text-decoration:none;font-weight:700;transition:background .2s,transform .2s,box-shadow .2s;box-shadow:0 0 20px rgba(0,232,124,.3)}
+.btn-green:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 0 40px rgba(0,232,124,.6)}
+.btn-outline{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;background:transparent;color:var(--text);border:1px solid rgba(0,232,124,.3);border-radius:4px;padding:14px 36px;text-decoration:none;transition:all .2s}
+.btn-outline:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
+
+/* ── SECTIONS ── */
+.section{padding:80px 40px;position:relative;z-index:1}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-kicker{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.28em;color:var(--green);margin-bottom:14px;text-align:center}
+.section-title{font-family:'Orbitron',sans-serif;font-size:clamp(22px,4vw,38px);font-weight:900;letter-spacing:.05em;color:#fff;text-align:center;margin-bottom:16px;line-height:1.2}
+.section-line{display:block;width:60px;height:2px;background:linear-gradient(90deg,var(--green),transparent);margin:0 auto 24px}
+.section-sub{font-size:17px;color:var(--text);text-align:center;max-width:680px;margin:0 auto 52px;line-height:1.8}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+.feat-card{background:var(--bg-card);border:1px solid rgba(0,232,124,.12);border-radius:12px;padding:28px 24px;transition:border-color .3s,transform .3s}
+.feat-card:hover{border-color:rgba(0,232,124,.35);transform:translateY(-4px)}
+.feat-icon{font-size:34px;margin-bottom:12px}
+.feat-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--green);margin-bottom:10px}
+.feat-body{font-size:15px;color:var(--text);line-height:1.7}
+
+/* ── STORY BAND ── */
+.story-band{background:linear-gradient(135deg,rgba(0,232,124,.06),rgba(184,255,58,.03));border:1px solid rgba(0,232,124,.18);border-radius:20px;padding:52px 48px;max-width:960px;margin:0 auto}
+.story-quote{font-family:'Orbitron',sans-serif;font-size:clamp(15px,2.2vw,20px);font-weight:700;color:#fff;line-height:1.5;margin-bottom:28px}
+.story-quote em{color:var(--green);font-style:normal}
+.story-body{font-size:16px;color:var(--text);line-height:1.85;margin-bottom:16px}
+.story-body strong{color:#fff}
+.story-sig{margin-top:28px;padding-top:24px;border-top:1px solid rgba(0,232,124,.15)}
+.story-name{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:#fff;letter-spacing:.08em;margin-bottom:4px}
+.story-role{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--green)}
+
+/* ── SPECS ── */
+.specs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;max-width:1000px;margin:0 auto}
+.spec-card{background:var(--bg-card);border:1px solid rgba(0,232,124,.1);border-radius:10px;padding:22px 16px;text-align:center}
+.spec-icon{font-size:30px;margin-bottom:8px}
+.spec-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--green);margin-bottom:6px}
+.spec-val{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#fff}
+
+/* ── WHAT BROKE ── */
+.broke-band{background:linear-gradient(135deg,rgba(232,0,61,.05),rgba(240,165,0,.04));border:1px solid rgba(240,165,0,.2);border-radius:20px;padding:48px 44px;max-width:900px;margin:0 auto;text-align:center}
+
+/* ── TIMELINE DOT ── */
+.chain{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:40px 0}
+.chain-step{text-align:center;padding:20px 24px;background:var(--bg-card);border-radius:12px;min-width:160px;border:1px solid rgba(0,232,124,.2)}
+.chain-arrow{font-size:24px;color:rgba(0,232,124,.25);padding:0 8px}
+.chain-icon{font-size:30px;margin-bottom:8px}
+.chain-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);margin-bottom:4px}
+.chain-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#fff}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid rgba(0,232,124,.1);padding:48px 40px;text-align:center;position:relative;z-index:1}
+.footer-brand{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;letter-spacing:.15em;color:#fff;margin-bottom:6px}
+.footer-brand span{color:var(--green)}
+.footer-sub{font-size:14px;color:var(--text);margin-bottom:24px}
+.footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;list-style:none;margin-bottom:32px}
+.footer-links a{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--text);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--green)}
+.footer-copy{font-size:13px;color:rgba(168,212,184,.4)}
+
+/* ── CONNECT AVATAR ── */
+.av-connect-btn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.12em;color:#010d04;background:var(--green);border:none;border-radius:999px;padding:9px 18px;cursor:pointer;white-space:nowrap;transition:background .2s}
+.av-connect-btn:hover{background:var(--green2)}
+.av-connected-badge{display:none;align-items:center;gap:8px;background:rgba(0,232,124,.1);border:1px solid rgba(0,232,124,.25);border-radius:999px;padding:6px 14px}
+.av-connected-badge.show{display:flex}
+.av-avatar-name{font-family:'Share Tech Mono',monospace;font-size:11px;color:#fff;letter-spacing:.08em}
+.av-karma-pill{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);cursor:pointer}
+.av-logout-btn{background:none;border:none;color:rgba(168,212,184,.5);cursor:pointer;font-size:12px;padding:0 2px}
+.av-logout-btn:hover{color:#fff}
+.av-modal-overlay{display:none;position:fixed;inset:0;background:rgba(1,13,4,.9);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center}
+.av-modal-overlay.open{display:flex}
+.av-modal{background:#051209;border:1px solid rgba(0,232,124,.2);border-radius:16px;padding:40px;width:100%;max-width:400px;text-align:center;position:relative}
+.av-modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:rgba(168,212,184,.5);font-size:18px;cursor:pointer}
+.av-modal-close:hover{color:#fff}
+.av-modal-kicker{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--green);margin-bottom:10px}
+.av-modal-title{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#fff;margin-bottom:8px}
+.av-modal-sub{font-size:14px;color:var(--text);margin-bottom:24px;line-height:1.6}
+.av-field{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(0,232,124,.2);border-radius:8px;padding:12px 16px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;margin-bottom:12px;outline:none;transition:border-color .2s}
+.av-field:focus{border-color:rgba(0,232,124,.5)}
+.av-field::placeholder{color:rgba(168,212,184,.4)}
+.av-submit{width:100%;background:var(--green);color:#010d04;border:none;border-radius:4px;padding:13px;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;cursor:pointer;margin-top:4px;transition:background .2s}
+.av-submit:hover{background:var(--green2)}
+.av-error{font-size:13px;color:#ff5f5f;margin-top:8px;min-height:20px}
+
+@media(max-width:820px){
+  .section{padding:60px 20px}
+  .story-band{padding:36px 24px}
+  .broke-band{padding:36px 24px}
+  .chain{flex-direction:column}
+  .chain-arrow{transform:rotate(90deg)}
+}
+@media(max-width:520px){.section{padding:60px .75rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#"><span>SNAKE</span>3000</a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#story">The Story</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#breaking-point">The Moment</a></li>
+    <li><a href="#legacy">Legacy</a></li>
+    <li><a href="#chain">The Chain</a></li>
+    <li class="nav-links-mobile-only"><a href="https://oasisomniverse.one" target="_blank" rel="noopener">OASIS Omniverse</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="nav-cta" href="https://oasisomniverse.one" target="_blank" rel="noopener">🌌 OASIS</a>
+  </div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-kicker">NEXTGEN SOFTWARE · 1999 · VB6 · WHERE THE JOURNEY BEGAN</div>
+  <span class="snake-animation">🐍🐍🐍</span>
+  <h1 class="hero-title">SNAKE 3000</h1>
+  <div class="hero-year">THE GAME THAT STARTED IT ALL</div>
+  <div class="hero-tagline">AI OPPONENTS · 4-PLAYER NETWORK MULTIPLAYER · CHAT · MULTIPLE GAME MODES · FREEWARE</div>
+  <p class="hero-sub">It started as Snake. Then David Ellams added AI. Then network code. Then 4-player multiplayer. Then it started demanding more than VB6 could give — and <strong>that limitation changed everything.</strong></p>
+  <div class="hero-btns">
+    <a class="btn-green" href="#story">Read the Story →</a>
+    <a class="btn-outline" href="#features">See the Features</a>
+  </div>
+</section>
+
+<!-- THE STORY -->
+<section class="section" id="story" style="background:rgba(0,232,124,.02)">
+  <div class="section-inner">
+    <div class="section-kicker">THE ORIGIN OF THE ORIGIN</div>
+    <h2 class="section-title">Before Shadow Fighter, There Was Snake.</h2>
+    <span class="section-line"></span>
+
+    <div class="story-band">
+      <div class="story-quote">"I didn't just want to remake Snake. I wanted AI that could actually play against you. I wanted friends to connect across a network. I wanted it to be <em>alive.</em>"</div>
+      <p class="story-body">It was 1999. The internet was just arriving. David Ellams was a second-year Computing & Informatics student who found desktop app development in Delphi boring — so he taught himself HTML and built websites in Notepad while his classmates did the assignments. Then he turned to games.</p>
+      <p class="story-body">Snake 3000 was born in VB6 — but it was never going to be an ordinary Snake clone. David added <strong>AI opponents</strong> that could actually challenge you. Then he built <strong>network multiplayer for up to 4 players</strong> — in 1999, when most games barely had this. Then a <strong>live chat system</strong> between players. Multiple game modes. A full feature set that went miles beyond what anyone expected from a student project.</p>
+      <p class="story-body">And then VB6 started struggling. The network synchronisation was demanding more speed, more precision, more control than Visual Basic could provide. David hit the ceiling — and instead of accepting it, he did something that would define the next 25 years of his life:</p>
+      <p class="story-body" style="color:var(--green);font-size:18px;font-weight:600">He decided to teach himself C++.</p>
+      <p class="story-body">Snake 3000 didn't just produce a game. It produced the decision that led to Shadow Fighter. Which led to Yoga4Autism. Which led to the OASIS. The whole universe traces back to a snake that moved too fast for VB6.</p>
+      <div class="story-sig">
+        <div class="story-name">David Ellams</div>
+        <div class="story-role">CREATOR OF SNAKE 3000 · CEO/CTO/FOUNDER — NEXTGEN WORLD LTD · CREATOR OF THE OASIS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-kicker">FEATURES</div>
+    <h2 class="section-title">Not Your Average Snake Game.</h2>
+    <span class="section-line"></span>
+    <p class="section-sub">Snake 3000 was built in VB6 — but what it did was anything but basic. This was 1999, and David was already thinking in multiplayer, AI and real-time networking.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">AI OPPONENTS</div>
+        <p class="feat-body">Custom AI players that could genuinely challenge you — not random movement, but actual decision-making logic that adapted to the game state. Built from scratch in VB6 before AI in games was mainstream.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-title">4-PLAYER NETWORK MULTIPLAYER</div>
+        <p class="feat-body">Up to 4 players connected across a network in real-time. In 1999. Hand-coded network synchronisation that eventually pushed VB6 to its absolute limits — and beyond.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💬</div>
+        <div class="feat-title">IN-GAME CHAT</div>
+        <p class="feat-body">Live chat between players during multiplayer sessions — a feature that many commercial games of the era didn't have. The social layer was always part of David's thinking, even in 1999.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎮</div>
+        <div class="feat-title">MULTIPLE GAME MODES</div>
+        <p class="feat-body">Solo play against AI, local multiplayer and network multiplayer — with different rule sets and configurations. More variety than most commercial Snake releases of the time.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🆓</div>
+        <div class="feat-title">FREEWARE</div>
+        <p class="feat-body">Released completely free — because David always believed great software should be accessible to everyone. That philosophy never changed. It echoes through every OASIS project to this day.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">BUILT IN VB6</div>
+        <p class="feat-body">Visual Basic 6 — pushed far beyond what most developers thought possible. Snake 3000 extracted every drop of performance VB6 could give, and when it wasn't enough, David moved to C++. The tool never limits the vision.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE BREAKING POINT -->
+<section class="section" id="breaking-point" style="background:rgba(240,165,0,.02)">
+  <div class="section-inner">
+    <div class="section-kicker">THE MOMENT EVERYTHING CHANGED</div>
+    <h2 class="section-title">When VB6 Said No.</h2>
+    <span class="section-line"></span>
+
+    <div class="broke-band">
+      <div style="font-size:64px;margin-bottom:20px">⚡</div>
+      <h3 style="font-family:'Orbitron',sans-serif;font-size:clamp(16px,2.5vw,24px);font-weight:900;color:var(--gold);margin-bottom:20px;letter-spacing:.04em">The Network Sync That Changed History</h3>
+      <p style="font-size:17px;color:var(--text);line-height:1.85;max-width:720px;margin:0 auto 16px">Snake 3000's network multiplayer was working — but VB6 wasn't fast enough to keep 4 players perfectly synchronised in real time. The lag was there. The limitations were real. Most developers would have accepted it.</p>
+      <p style="font-size:17px;color:#fff;line-height:1.85;max-width:720px;margin:0 auto 16px;font-weight:600">David decided to learn C++ instead.</p>
+      <p style="font-size:17px;color:var(--text);line-height:1.85;max-width:720px;margin:0 auto 16px">Not just C++ — low-level DirectX. From scratch. In the middle of his final year. Because the alternative — settling for "good enough" — wasn't something his brain was wired to accept.</p>
+      <p style="font-size:17px;color:var(--gold);line-height:1.85;max-width:720px;margin:0 auto;font-weight:600;font-style:italic">That decision produced Shadow Fighter. Shadow Fighter unlocked the aspie superpower. The aspie superpower built the OASIS. And the OASIS is going to change the world.</p>
+      <p style="font-size:14px;color:var(--text);margin-top:20px;opacity:.7">All because VB6 wasn't fast enough.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LEGACY -->
+<section class="section" id="legacy">
+  <div class="section-inner">
+    <div class="section-kicker">BY THE NUMBERS</div>
+    <h2 class="section-title">Snake 3000 at a Glance</h2>
+    <span class="section-line"></span>
+
+    <div class="specs-grid">
+      <div class="spec-card"><div class="spec-icon">📅</div><div class="spec-title">YEAR</div><div class="spec-val">1999</div></div>
+      <div class="spec-card"><div class="spec-icon">⚙️</div><div class="spec-title">LANGUAGE</div><div class="spec-val">VB6</div></div>
+      <div class="spec-card"><div class="spec-icon">👤</div><div class="spec-title">TEAM SIZE</div><div class="spec-val">1 Person</div></div>
+      <div class="spec-card"><div class="spec-icon">🎮</div><div class="spec-title">MAX PLAYERS</div><div class="spec-val">4 Online</div></div>
+      <div class="spec-card"><div class="spec-icon">🤖</div><div class="spec-title">AI PLAYERS</div><div class="spec-val">Yes</div></div>
+      <div class="spec-card"><div class="spec-icon">💬</div><div class="spec-title">IN-GAME CHAT</div><div class="spec-val">Yes</div></div>
+      <div class="spec-card"><div class="spec-icon">💰</div><div class="spec-title">PRICE</div><div class="spec-val">Free</div></div>
+      <div class="spec-card"><div class="spec-icon">🌍</div><div class="spec-title">WHAT IT SPARKED</div><div class="spec-val">Everything</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE CHAIN -->
+<section class="section" id="chain" style="background:rgba(0,232,124,.02)">
+  <div class="section-inner">
+    <div class="section-kicker">THE DOMINO EFFECT</div>
+    <h2 class="section-title">One Snake. One Universe.</h2>
+    <span class="section-line"></span>
+    <p class="section-sub">Every step in the chain was triggered by the last. Snake 3000 is not just a game — it is the first domino in a sequence that ends with a technology platform designed to change the world.</p>
+
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-icon">🐍</div>
+        <div class="chain-label">1999</div>
+        <div class="chain-title">Snake 3000</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-icon">⚡</div>
+        <div class="chain-label">VB6 LIMIT HIT</div>
+        <div class="chain-title">Learns C++ & DirectX</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-icon">🕹️</div>
+        <div class="chain-label">2001</div>
+        <div class="chain-title">Shadow Fighter</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-icon">🧘</div>
+        <div class="chain-label">2013</div>
+        <div class="chain-title">Yoga4Autism</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-icon">🌍</div>
+        <div class="chain-label">2016</div>
+        <div class="chain-title">Our World</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-icon">🌌</div>
+        <div class="chain-label">2019</div>
+        <div class="chain-title">The OASIS</div>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:16px;color:var(--text);max-width:660px;margin:0 auto;line-height:1.8">The aspie superpower doesn't accept limitations. It finds a way around them — and in doing so, accidentally builds something far greater than the original problem required. <strong style="color:#fff">That is the Snake 3000 story. That is the OASIS story.</strong></p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand"><span>SNAKE</span>3000</div>
+  <p class="footer-sub">Created 1999 by David Ellams · The game that started it all · Part of the OASIS Omniverse legacy</p>
+  <ul class="footer-links">
+    <li><a href="#story">The Story</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#breaking-point">The Moment</a></li>
+    <li><a href="#chain">The Chain</a></li>
+    <li><a href="https://shadowfighter.oasisomniverse.one" target="_blank" rel="noopener">Shadow Fighter</a></li>
+    <li><a href="https://yoga4autism.oasisomniverse.one" target="_blank" rel="noopener">Yoga4Autism</a></li>
+    <li><a href="https://jla.oasisomniverse.one" target="_blank" rel="noopener">Justice League Academy</a></li>
+    <li><a href="https://oasisomniverse.one" target="_blank" rel="noopener">OASIS Omniverse</a></li>
+  </ul>
+  <p class="footer-copy">© 1999–2026 David Ellams & NextGen World Ltd. All rights reserved.</p>
+</footer>
+
+<!-- CONNECT AVATAR MODAL -->
+<div class="av-modal-overlay" id="av-modal-overlay">
+  <div class="av-modal">
+    <button class="av-modal-close" id="av-modal-close">✕</button>
+    <div class="av-modal-kicker">OASIS WEB4 API</div>
+    <div class="av-modal-title">Connect Your Avatar</div>
+    <p class="av-modal-sub">Sign in to connect your OASIS avatar to the Snake 3000 legacy.</p>
+    <input class="av-field" id="bi-email" type="email" placeholder="Email address" autocomplete="username">
+    <input class="av-field" id="bi-password" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="av-submit" id="av-submit">CONNECT AVATAR</button>
+    <div class="av-error" id="av-error"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById('nav-toggle').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('nav-links').classList.toggle('open');
+});
+
+// Pixel-style stars
+(function(){
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none';
+  document.body.prepend(canvas);
+  const ctx=canvas.getContext('2d');
+  let dots=[];
+  function resize(){
+    canvas.width=innerWidth;canvas.height=innerHeight;
+    dots=Array.from({length:120},()=>({
+      x:Math.round(Math.random()*innerWidth/4)*4,
+      y:Math.round(Math.random()*innerHeight/4)*4,
+      o:Math.random()*.4+.05,s:Math.random()*.15+.03,
+      c:Math.random()>.9?'rgba(184,255,58,':'rgba(0,232,124,'
+    }));
+  }
+  resize();window.addEventListener('resize',resize);
+  (function draw(){
+    requestAnimationFrame(draw);ctx.clearRect(0,0,canvas.width,canvas.height);
+    dots.forEach(d=>{
+      d.o+=d.s*.008*(Math.random()>.5?1:-1);
+      d.o=Math.max(.03,Math.min(.5,d.o));
+      ctx.fillStyle=d.c+d.o+')';
+      ctx.fillRect(d.x,d.y,2,2);
+    });
+  })();
+})();
+
+// Connect Avatar
+(function(){
+  const navCta=document.querySelector('.nav-cta');
+  if(!navCta)return;
+  const connectBtn=document.createElement('button');
+  connectBtn.className='av-connect-btn';connectBtn.id='av-connect-btn';
+  connectBtn.textContent='⬡ CONNECT AVATAR';
+  navCta.closest('.nav-right').appendChild(connectBtn);
+  const badge=document.createElement('div');
+  badge.className='av-connected-badge';badge.id='av-badge';
+  badge.innerHTML=`<span class="av-avatar-name" id="av-avatar-name">—</span><span class="av-karma-pill" id="av-karma-pill">🐍 0</span><button class="av-logout-btn" id="av-logout-btn">✕</button>`;
+  navCta.closest('.nav-right').appendChild(badge);
+  document.getElementById('av-logout-btn').addEventListener('click',logout);
+  const overlay=document.getElementById('av-modal-overlay');
+  document.getElementById('av-modal-close').addEventListener('click',()=>overlay.classList.remove('open'));
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open')});
+  connectBtn.addEventListener('click',()=>overlay.classList.add('open'));
+  document.getElementById('av-submit').addEventListener('click',async()=>{
+    const email=document.getElementById('bi-email').value.trim();
+    const password=document.getElementById('bi-password').value;
+    const err=document.getElementById('av-error');err.textContent='';
+    if(!email||!password){err.textContent='Please enter your email and password.';return;}
+    try{
+      const{OASISClient}=await import('https://esm.sh/@oasisomniverse/web4-api@2.0.2');
+      const client=new OASISClient({baseUrl:'https://api.web4.oasisomniverse.one',persistSession:true});
+      const res=await client.avatar.login({username:email,password});
+      if(res?.isError){err.textContent=res.message||'Login failed.';return;}
+      const av=res?.result?.avatar||res?.result;
+      if(av){
+        document.getElementById('av-avatar-name').textContent=av.username||av.email||'Avatar';
+        document.getElementById('av-karma-pill').textContent='🐍 '+(av.karmaTotal??0);
+        connectBtn.style.display='none';badge.classList.add('show');
+        overlay.classList.remove('open');
+      }
+    }catch(e){err.textContent='Connection error. Please try again.';}
+  });
+  function logout(){
+    connectBtn.style.display='';badge.classList.remove('show');
+    document.getElementById('av-avatar-name').textContent='—';
+    document.getElementById('av-karma-pill').textContent='🐍 0';
+  }
+})();
+</script>
+</body>
+</html>
